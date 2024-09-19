@@ -1,0 +1,25 @@
+telegram_bot_ossetian_pies/
+│
+├── main.py                 # Основной файл приложения
+├── config.py               # Конфигурационный файл
+├── menu1.pdf               # Файл меню 1
+├── menu2.pdf               # Файл меню 2
+│
+├── assistants/             # Директория с классами ассистентов
+│   ├── __init__.py
+│   ├── base_assistant.py   # Базовый класс ассистента
+│   ├── logistics_assistant.py  # Класс логистического ассистента
+│   └── cashier_assistant.py    # Класс ассистента-кассира
+│
+├── handlers/               # Директория с обработчиками сообщений
+│   ├── __init__.py
+│   ├── start_handler.py    # Обработчик команды /start
+│   └── message_handler.py  # Обработчик текстовых сообщений
+│
+├── utils/                  # Директория с вспомогательными функциями
+│   ├── __init__.py
+│   └── telegram_utils.py   # Утилиты для работы с Telegram API
+│
+├── requirements.txt        # Файл с зависимостями проекта
+│
+└── README.md               # Документация проекта
