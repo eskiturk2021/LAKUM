@@ -5,10 +5,7 @@
 ## Установка
 
 1. Клонируйте репозиторий:
-   ```
-   git clone https://github.com/your-username/telegram-bot-ossetian-pies.git
-   cd telegram-bot-ossetian-pies
-   ```
+
 
 2. Установите зависимости:
    ```
@@ -43,6 +40,3 @@ python main.py
 - `handlers/`: Директория с обработчиками сообщений
 - `utils/`: Директория с вспомогательными функциями
 
-## Лицензия
-
-Этот проект распространяется под лицензией MIT. Подробности см. в файле `LICENSE`.
