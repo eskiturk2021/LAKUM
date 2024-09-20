@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ввод адреса доставки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8kJwZxmdYuIy3N0PRbtsQjWNrFEVAGxM&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8kJwZxmdYuIy3N0PRbtsQjWNrFEVAGxM&libraries=places&callback=initMap" async defer onerror="mapError()"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
         #map { height: 300px; width: 100%; margin-bottom: 20px; }
@@ -18,46 +18,51 @@
     <input id="address" type="text" placeholder="Введите ваш адрес доставки">
     <div id="map"></div>
     <button id="submit" disabled>Подтвердить адрес</button>
-
     <script>
         let map, autocomplete, directionsService, directionsRenderer;
         const bakeryLocation = { lat: 55.8152085, lng: 37.0685510 };
 
         function initMap() {
+            console.log("Map initialization started");
             map = new google.maps.Map(document.getElementById('map'), {
                 center: bakeryLocation,
                 zoom: 12
             });
-
             const bakeryMarker = new google.maps.Marker({
                 position: bakeryLocation,
                 map: map,
                 title: "Наша пекарня"
             });
-
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer();
             directionsRenderer.setMap(map);
-
             autocomplete = new google.maps.places.Autocomplete(
                 document.getElementById('address'),
                 { types: ['address'] }
             );
-
             autocomplete.addListener('place_changed', onPlaceChanged);
+            console.log("Map initialization completed");
+        }
+
+        function mapError() {
+            console.error("Error loading Google Maps API");
+            alert("Ошибка при загрузке карты. Пожалуйста, обновите страницу или попробуйте позже.");
         }
 
         function onPlaceChanged() {
+            console.log("Place changed");
             const place = autocomplete.getPlace();
             if (!place.geometry) {
+                console.error("No place geometry");
                 alert("Выбранный адрес не найден на карте");
                 return;
             }
-
+            console.log("Place geometry found", place.geometry.location);
             calculateAndDisplayRoute(place.geometry.location);
         }
 
         function calculateAndDisplayRoute(destination) {
+            console.log("Calculating route to", destination);
             directionsService.route(
                 {
                     origin: bakeryLocation,
@@ -65,6 +70,7 @@
                     travelMode: google.maps.TravelMode.DRIVING
                 },
                 (response, status) => {
+                    console.log("Route calculation status:", status);
                     if (status === "OK") {
                         directionsRenderer.setDirections(response);
                         const route = response.routes[0];
@@ -72,6 +78,7 @@
                         document.getElementById('submit').textContent = `Подтвердить адрес (${distance})`;
                         document.getElementById('submit').disabled = false;
                     } else {
+                        console.error("Route calculation failed:", status);
                         alert("Не удалось построить маршрут: " + status);
                     }
                 }
@@ -81,12 +88,18 @@
         document.getElementById('submit').addEventListener('click', () => {
             const address = document.getElementById('address').value;
             const distance = document.getElementById('submit').textContent.match(/\((.*?)\)/)[1];
+            console.log("Sending data to Telegram:", { address, distance });
             Telegram.WebApp.sendData(JSON.stringify({ address, distance }));
             Telegram.WebApp.close();
         });
 
-        Telegram.WebApp.ready();
-        initMap();
+        if (window.Telegram && window.Telegram.WebApp) {
+            console.log("Telegram WebApp is available");
+            Telegram.WebApp.ready();
+        } else {
+            console.error("Telegram WebApp is not available");
+            alert("Ошибка инициализации Telegram WebApp");
+        }
     </script>
 </body>
 </html>
