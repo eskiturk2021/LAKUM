@@ -1,12 +1,11 @@
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from config import TELEGRAM_BOT_TOKEN
 from handlers.start_handler import start
 from handlers.message_handler import handle_message
 from handlers.callback_handler import handle_callback
 
-# Setup logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,6 @@ import logging
 from assistants.base_assistant import BaseAssistant
 from config import LOGISTIC_ASSISTANT_ID, GOOGLE_MAPS_API_KEY, BAKERY_COORDINATES
 import googlemaps
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -14,17 +13,15 @@ class LogisticsAssistant(BaseAssistant):
 
     def process_address(self, thread, address):
         try:
-            # Получаем координаты адреса клиента
             geocode_result = self.gmaps.geocode(address)
             if not geocode_result:
                 return "Не удалось найти указанный адрес. Пожалуйста, уточните адрес доставки."
 
             client_location = geocode_result[0]['geometry']['location']
 
-            # Вычисляем расстояние между пекарней и клиентом
             distance_result = self.gmaps.distance_matrix(
-                f"{BAKERY_COORDINATES[0]},{BAKERY_COORDINATES[1]}",
-                f"{client_location['lat']},{client_location['lng']}",
+                f"{BAKERY_COORDINATES[0]},{BAKERY_COORDINATES[1]}", 
+                f"{client_location['lat']},{client_location['lng']}", 
                 mode="driving",
                 units="metric"
             )

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ввод адреса доставки</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #map { height: 300px; width: 100%; margin-bottom: 20px; }
+        #address { width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box; }
+        #submit { width: 100%; padding: 10px; background-color: #0088cc; color: white; border: none; cursor: pointer; }
+        #submit:disabled { background-color: #cccccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <input id="address" type="text" placeholder="Введите ваш адрес доставки">
+    <div id="map"></div>
+    <button id="submit" disabled>Подтвердить адрес</button>
+
+    <script>
+        let map, autocomplete, directionsService, directionsRenderer;
+        const bakeryLocation = { lat: BAKERY_LAT, lng: BAKERY_LNG };
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: bakeryLocation,
+                zoom: 12
+            });
+
+            const bakeryMarker = new google.maps.Marker({
+                position: bakeryLocation,
+                map: map,
+                title: "Наша пекарня"
+            });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+
+            autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById('address'),
+                { types: ['address'] }
+            );
+
+            autocomplete.addListener('place_changed', onPlaceChanged);
+        }
+
+        function onPlaceChanged() {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                alert("Выбранный адрес не найден на карте");
+                return;
+            }
+
+            calculateAndDisplayRoute(place.geometry.location);
+        }
+
+        function calculateAndDisplayRoute(destination) {
+            directionsService.route(
+                {
+                    origin: bakeryLocation,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                (response, status) => {
+                    if (status === "OK") {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0];
+                        const distance = route.legs[0].distance.text;
+                        document.getElementById('submit').textContent = `Подтвердить адрес (${distance})`;
+                        document.getElementById('submit').disabled = false;
+                    } else {
+                        alert("Не удалось построить маршрут: " + status);
+                    }
+                }
+            );
+        }
+
+        document.getElementById('submit').addEventListener('click', () => {
+            const address = document.getElementById('address').value;
+            const distance = document.getElementById('submit').textContent.match(/\((.*?)\)/)[1];
+            Telegram.WebApp.sendData(JSON.stringify({ address, distance }));
+            Telegram.WebApp.close();
+        });
+
+        Telegram.WebApp.ready();
+        initMap();
+    </script>
+</body>
+</html>
